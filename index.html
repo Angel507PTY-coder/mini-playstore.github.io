@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini PlayStore</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    body { background: #f3f4f6; }
+    .card:hover { transform: scale(1.03); transition: 0.3s; }
+  </style>
+</head>
+<body class="p-6">
+
+  <header class="text-center mb-6">
+    <h1 class="text-3xl font-bold text-blue-600">Mini PlayStore</h1>
+    <input id="buscar" type="text" placeholder="Buscar app..." class="mt-4 p-2 w-64 rounded border">
+    <a href="upload.html" class="ml-4 bg-blue-500 text-white px-4 py-2 rounded">Subir app</a>
+  </header>
+
+  <main id="appsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></main>
+
+  <footer class="text-center mt-10 text-gray-500">
+    <p>© 2025 Copyright Ángel</p>
+  </footer>
+
+  <script type="module">
+    import { db, collection, getDocs } from './firebase.js';
+    const appsContainer = document.getElementById('appsContainer');
+    const buscarInput = document.getElementById('buscar');
+
+    async function cargarApps() {
+      const querySnapshot = await getDocs(collection(db, "apps"));
+      let apps = [];
+      querySnapshot.forEach((doc) => apps.push(doc.data()));
+      mostrarApps(apps);
+
+      buscarInput.addEventListener('input', () => {
+        const texto = buscarInput.value.toLowerCase();
+        const filtradas = apps.filter(a => a.nombre.toLowerCase().includes(texto));
+        mostrarApps(filtradas);
+      });
+    }
+
+    function mostrarApps(lista) {
+      appsContainer.innerHTML = "";
+      lista.forEach(app => {
+        const card = document.createElement('div');
+        card.className = "card bg-white p-4 rounded-xl shadow-md";
+        card.innerHTML = `
+          <img src="${app.icono}" alt="${app.nombre}" class="w-16 h-16 rounded-lg mb-3">
+          <h2 class="font-bold text-lg">${app.nombre}</h2>
+          <p class="text-sm text-gray-500">${app.autor}</p>
+          <p class="text-sm mt-2">${app.descripcion}</p>
+          <a href="${app.url_apk}" target="_blank" class="inline-block mt-3 bg-green-500 text-white px-3 py-1 rounded">Descargar</a>
+        `;
+        appsContainer.appendChild(card);
+      });
+    }
+
+    cargarApps();
+  </script>
+</body>
+</html>
