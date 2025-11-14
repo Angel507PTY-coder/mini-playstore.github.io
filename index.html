@@ -5,54 +5,177 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mini PlayStore</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background: #f3f4f6; }
-    .card:hover { transform: scale(1.03); transition: 0.3s; }
+    body { 
+      background: #f3f4f6; 
+      min-height: 100vh;
+    }
+    .card:hover { 
+      transform: translateY(-5px); 
+      transition: 0.3s; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .profile-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      min-width: 200px;
+      z-index: 1000;
+    }
+    .profile-menu.show {
+      display: block;
+    }
   </style>
 </head>
-<body class="p-6">
+<body class="p-4 md:p-6">
 
-  <header class="text-center mb-6">
-    <h1 class="text-3xl font-bold text-blue-600">Mini PlayStore</h1>
-    <input id="buscar" type="text" placeholder="Buscar app..." class="mt-4 p-2 w-64 rounded border">
-    <a href="upload.html" class="ml-4 bg-blue-500 text-white px-4 py-2 rounded">Subir app</a>
+  <!-- Header Mejorado -->
+  <header class="flex justify-between items-center mb-6 md:mb-8 relative">
+    <div class="flex items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-blue-600">Mini PlayStore</h1>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+      <!-- Barra de búsqueda -->
+      <div class="hidden md:block">
+        <input id="buscar" type="text" placeholder="Buscar app..." 
+               class="p-2 w-48 lg:w-64 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      
+      <!-- Icono de perfil -->
+      <div class="relative">
+        <button id="profileBtn" class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
+          <i class="fas fa-user"></i>
+        </button>
+        
+        <!-- Menú desplegable del perfil -->
+        <div id="profileMenu" class="profile-menu">
+          <div class="p-4 border-b">
+            <p class="font-semibold">Usuario</p>
+            <p class="text-sm text-gray-500">Bienvenido</p>
+          </div>
+          <a href="upload.html" class="block px-4 py-3 hover:bg-gray-100 text-blue-600">
+            <i class="fas fa-upload mr-2"></i>Subir APK
+          </a>
+          <a href="#" class="block px-4 py-3 hover:bg-gray-100">
+            <i class="fas fa-history mr-2"></i>Mis subidas
+          </a>
+          <a href="#" class="block px-4 py-3 hover:bg-gray-100">
+            <i class="fas fa-cog mr-2"></i>Configuración
+          </a>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <main id="appsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></main>
+  <!-- Barra de búsqueda móvil -->
+  <div class="md:hidden mb-4">
+    <input id="buscarMobile" type="text" placeholder="Buscar app..." 
+           class="p-3 w-full rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+  </div>
 
-  <footer class="text-center mt-10 text-gray-500">
+  <!-- Botón subir app móvil -->
+  <div class="md:hidden mb-6">
+    <a href="upload.html" class="block w-full bg-blue-500 text-white text-center py-3 rounded-lg hover:bg-blue-600 transition">
+      <i class="fas fa-plus mr-2"></i>Subir Nueva App
+    </a>
+  </div>
+
+  <!-- Contenedor de apps -->
+  <main id="appsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"></main>
+
+  <!-- Footer -->
+  <footer class="text-center mt-10 md:mt-12 text-gray-500 py-4">
     <p>© 2025 Copyright Ángel</p>
   </footer>
 
   <script type="module">
     import { db, collection, getDocs } from './firebase.js';
+    
     const appsContainer = document.getElementById('appsContainer');
-    const buscarInput = document.getElementById('buscar');
+    const buscarInput = document.getElementById('buscar') || document.getElementById('buscarMobile');
+    const profileBtn = document.getElementById('profileBtn');
+    const profileMenu = document.getElementById('profileMenu');
+
+    // Toggle menú de perfil
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle('show');
+    });
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', () => {
+      profileMenu.classList.remove('show');
+    });
 
     async function cargarApps() {
-      const querySnapshot = await getDocs(collection(db, "apps"));
-      let apps = [];
-      querySnapshot.forEach((doc) => apps.push(doc.data()));
-      mostrarApps(apps);
+      try {
+        const querySnapshot = await getDocs(collection(db, "apps"));
+        let apps = [];
+        querySnapshot.forEach((doc) => {
+          const appData = doc.data();
+          apps.push({ id: doc.id, ...appData });
+        });
+        
+        mostrarApps(apps);
 
-      buscarInput.addEventListener('input', () => {
-        const texto = buscarInput.value.toLowerCase();
-        const filtradas = apps.filter(a => a.nombre.toLowerCase().includes(texto));
-        mostrarApps(filtradas);
-      });
+        buscarInput.addEventListener('input', () => {
+          const texto = buscarInput.value.toLowerCase();
+          const filtradas = apps.filter(a => 
+            a.nombre.toLowerCase().includes(texto) ||
+            a.autor.toLowerCase().includes(texto) ||
+            a.descripcion.toLowerCase().includes(texto)
+          );
+          mostrarApps(filtradas);
+        });
+
+      } catch (error) {
+        console.error("Error cargando apps:", error);
+        appsContainer.innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <p class="text-red-500">Error cargando aplicaciones</p>
+          </div>
+        `;
+      }
     }
 
     function mostrarApps(lista) {
       appsContainer.innerHTML = "";
+      
+      if (lista.length === 0) {
+        appsContainer.innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <p class="text-gray-500">No se encontraron aplicaciones</p>
+          </div>
+        `;
+        return;
+      }
+
       lista.forEach(app => {
         const card = document.createElement('div');
-        card.className = "card bg-white p-4 rounded-xl shadow-md";
+        card.className = "card bg-white p-4 rounded-xl shadow-md flex flex-col h-full";
         card.innerHTML = `
-          <img src="${app.icono}" alt="${app.nombre}" class="w-16 h-16 rounded-lg mb-3">
-          <h2 class="font-bold text-lg">${app.nombre}</h2>
-          <p class="text-sm text-gray-500">${app.autor}</p>
-          <p class="text-sm mt-2">${app.descripcion}</p>
-          <a href="${app.url_apk}" target="_blank" class="inline-block mt-3 bg-green-500 text-white px-3 py-1 rounded">Descargar</a>
+          <div class="flex items-start mb-3">
+            <img src="${app.icono}" alt="${app.nombre}" 
+                 class="w-12 h-12 md:w-16 md:h-16 rounded-lg flex-shrink-0"
+                 onerror="this.src='https://via.placeholder.com/64?text=App'">
+            <div class="ml-3 flex-1">
+              <h2 class="font-bold text-base md:text-lg line-clamp-1">${app.nombre}</h2>
+              <p class="text-xs md:text-sm text-gray-500">${app.autor}</p>
+            </div>
+          </div>
+          <p class="text-xs md:text-sm text-gray-600 mb-4 flex-1 line-clamp-2">${app.descripcion}</p>
+          <div class="mt-auto">
+            <a href="${app.url_apk}" target="_blank" 
+               class="inline-flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition text-sm md:text-base">
+              <i class="fas fa-download mr-2"></i>Descargar APK
+            </a>
+          </div>
         `;
         appsContainer.appendChild(card);
       });
