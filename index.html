@@ -30,14 +30,28 @@
     .profile-menu.show {
       display: block;
     }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="p-4 md:p-6">
 
-  <!-- Header Mejorado -->
+  <!-- Header -->
   <header class="flex justify-between items-center mb-6 md:mb-8 relative">
     <div class="flex items-center">
       <h1 class="text-2xl md:text-3xl font-bold text-blue-600">Mini PlayStore</h1>
+      <span id="connectionStatus" class="ml-2 text-xs hidden"></span>
     </div>
     
     <div class="flex items-center space-x-4">
@@ -63,9 +77,6 @@
             <i class="fas fa-upload mr-2"></i>Subir APK
           </a>
           <a href="#" class="block px-4 py-3 hover:bg-gray-100">
-            <i class="fas fa-history mr-2"></i>Mis subidas
-          </a>
-          <a href="#" class="block px-4 py-3 hover:bg-gray-100">
             <i class="fas fa-cog mr-2"></i>Configuración
           </a>
         </div>
@@ -86,8 +97,34 @@
     </a>
   </div>
 
+  <!-- Estado de carga -->
+  <div id="loadingState" class="text-center py-8">
+    <div class="loading mx-auto mb-2"></div>
+    <p class="text-gray-600">Cargando aplicaciones...</p>
+  </div>
+
   <!-- Contenedor de apps -->
-  <main id="appsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"></main>
+  <main id="appsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 hidden"></main>
+
+  <!-- Estado vacío -->
+  <div id="emptyState" class="hidden text-center py-8">
+    <i class="fas fa-inbox text-4xl text-gray-400 mb-4"></i>
+    <p class="text-gray-600 text-lg">No hay aplicaciones todavía</p>
+    <p class="text-sm text-gray-400 mt-2">Sé el primero en subir una app</p>
+    <a href="upload.html" class="inline-block mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+      <i class="fas fa-plus mr-2"></i>Subir Primera App
+    </a>
+  </div>
+
+  <!-- Estado de error -->
+  <div id="errorState" class="hidden text-center py-8">
+    <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+    <h3 class="text-xl font-bold text-red-600 mb-2">Error de conexión</h3>
+    <p class="text-gray-600 mb-4" id="errorMessage">No se pudieron cargar las aplicaciones</p>
+    <button onclick="recargarApps()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+      <i class="fas fa-redo mr-2"></i>Reintentar
+    </button>
+  </div>
 
   <!-- Footer -->
   <footer class="text-center mt-10 md:mt-12 text-gray-500 py-4">
@@ -98,9 +135,13 @@
     import { db, collection, getDocs } from './firebase.js';
     
     const appsContainer = document.getElementById('appsContainer');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const errorState = document.getElementById('errorState');
     const buscarInput = document.getElementById('buscar') || document.getElementById('buscarMobile');
     const profileBtn = document.getElementById('profileBtn');
     const profileMenu = document.getElementById('profileMenu');
+    const connectionStatus = document.getElementById('connectionStatus');
 
     // Toggle menú de perfil
     profileBtn.addEventListener('click', (e) => {
@@ -113,34 +154,65 @@
       profileMenu.classList.remove('show');
     });
 
+    // Función para recargar apps
+    window.recargarApps = () => {
+      errorState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      cargarApps();
+    };
+
     async function cargarApps() {
       try {
+        console.log("📥 Cargando aplicaciones...");
+        
         const querySnapshot = await getDocs(collection(db, "apps"));
         let apps = [];
+        
         querySnapshot.forEach((doc) => {
           const appData = doc.data();
           apps.push({ id: doc.id, ...appData });
         });
         
-        mostrarApps(apps);
+        console.log(`✅ ${apps.length} aplicaciones cargadas`);
+        
+        // Mostrar estado correspondiente
+        loadingState.classList.add('hidden');
+        
+        if (apps.length === 0) {
+          emptyState.classList.remove('hidden');
+          appsContainer.classList.add('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+          appsContainer.classList.remove('hidden');
+          mostrarApps(apps);
+        }
+        
+        actualizarEstadoConexion(true);
 
+        // Configurar búsqueda
         buscarInput.addEventListener('input', () => {
           const texto = buscarInput.value.toLowerCase();
           const filtradas = apps.filter(a => 
-            a.nombre.toLowerCase().includes(texto) ||
-            a.autor.toLowerCase().includes(texto) ||
-            a.descripcion.toLowerCase().includes(texto)
+            a.nombre && a.nombre.toLowerCase().includes(texto) ||
+            a.autor && a.autor.toLowerCase().includes(texto) ||
+            a.descripcion && a.descripcion.toLowerCase().includes(texto)
           );
           mostrarApps(filtradas);
         });
 
       } catch (error) {
-        console.error("Error cargando apps:", error);
-        appsContainer.innerHTML = `
-          <div class="col-span-full text-center py-8">
-            <p class="text-red-500">Error cargando aplicaciones</p>
-          </div>
-        `;
+        console.error("❌ Error cargando apps:", error);
+        
+        // Mostrar estado de error
+        loadingState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        appsContainer.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        
+        document.getElementById('errorMessage').textContent = 
+          error.message || 'No se pudieron cargar las aplicaciones';
+        
+        actualizarEstadoConexion(false);
       }
     }
 
@@ -150,7 +222,9 @@
       if (lista.length === 0) {
         appsContainer.innerHTML = `
           <div class="col-span-full text-center py-8">
-            <p class="text-gray-500">No se encontraron aplicaciones</p>
+            <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-500 text-lg">No se encontraron aplicaciones</p>
+            <p class="text-sm text-gray-400 mt-2">Intenta con otros términos de búsqueda</p>
           </div>
         `;
         return;
@@ -161,18 +235,19 @@
         card.className = "card bg-white p-4 rounded-xl shadow-md flex flex-col h-full";
         card.innerHTML = `
           <div class="flex items-start mb-3">
-            <img src="${app.icono}" alt="${app.nombre}" 
-                 class="w-12 h-12 md:w-16 md:h-16 rounded-lg flex-shrink-0"
-                 onerror="this.src='https://via.placeholder.com/64?text=App'">
+            <img src="${app.icono || 'https://via.placeholder.com/64/3B82F6/FFFFFF?text=APP'}" 
+                 alt="${app.nombre || 'App'}" 
+                 class="w-12 h-12 md:w-16 md:h-16 rounded-lg flex-shrink-0 object-cover">
             <div class="ml-3 flex-1">
-              <h2 class="font-bold text-base md:text-lg line-clamp-1">${app.nombre}</h2>
-              <p class="text-xs md:text-sm text-gray-500">${app.autor}</p>
+              <h2 class="font-bold text-base md:text-lg line-clamp-1">${app.nombre || 'Sin nombre'}</h2>
+              <p class="text-xs md:text-sm text-gray-500">${app.autor || 'Anónimo'}</p>
             </div>
           </div>
-          <p class="text-xs md:text-sm text-gray-600 mb-4 flex-1 line-clamp-2">${app.descripcion}</p>
+          <p class="text-xs md:text-sm text-gray-600 mb-4 flex-1 line-clamp-2">${app.descripcion || 'Sin descripción'}</p>
           <div class="mt-auto">
-            <a href="${app.url_apk}" target="_blank" 
-               class="inline-flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition text-sm md:text-base">
+            <a href="${app.url_apk || '#'}" 
+               ${app.url_apk ? 'target="_blank"' : ''}
+               class="inline-flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition text-sm md:text-base ${!app.url_apk ? 'opacity-50 cursor-not-allowed' : ''}">
               <i class="fas fa-download mr-2"></i>Descargar APK
             </a>
           </div>
@@ -181,6 +256,18 @@
       });
     }
 
+    function actualizarEstadoConexion(conectado) {
+      if (conectado) {
+        connectionStatus.innerHTML = '✅ Conectado';
+        connectionStatus.className = 'ml-2 text-xs text-green-600';
+      } else {
+        connectionStatus.innerHTML = '❌ Error';
+        connectionStatus.className = 'ml-2 text-xs text-red-600';
+      }
+      connectionStatus.classList.remove('hidden');
+    }
+
+    // Iniciar carga de apps
     cargarApps();
   </script>
 </body>
