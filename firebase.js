@@ -1,10 +1,10 @@
 // Importar funciones de Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// Configuración de tu proyecto Firebase
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDoizr-HCNDNaklLmBgTGqfvRVukzfxiMQ",
   authDomain: "mini-playstore.firebaseapp.com",
@@ -15,14 +15,21 @@ const firebaseConfig = {
 };
 
 // Inicializar Firebase
+console.log("🚀 Inicializando Firebase...");
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-// Iniciar sesión anónima (permite subir apps)
-signInAnonymously(auth).then(() => {
-  console.log("Sesión anónima iniciada ✅");
-}).catch((error) => console.error("Error al iniciar sesión:", error));
+console.log("✅ Firebase inicializado correctamente");
 
-export { db, collection, getDocs, addDoc, serverTimestamp, storage, ref, uploadBytes, getDownloadURL };
+// Autenticación anónima
+signInAnonymously(auth)
+  .then(() => console.log("✅ Autenticación anónima exitosa"))
+  .catch(error => console.error("❌ Error en autenticación:", error));
+
+// Exportar servicios
+export { 
+  db, collection, getDocs, addDoc, serverTimestamp,
+  storage, ref, uploadBytes, getDownloadURL 
+};
