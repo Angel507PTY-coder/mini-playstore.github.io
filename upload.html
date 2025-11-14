@@ -6,144 +6,483 @@
   <title>Subir App - Mini PlayStore</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { 
+      background: #f3f4f6; 
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .form-card {
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .file-upload {
+      border: 2px dashed #d1d5db;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+    .file-upload:hover {
+      border-color: #3b82f6;
+      background-color: #f0f7ff;
+    }
+    .file-upload.dragover {
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+      transform: scale(1.02);
+    }
+    .progress-bar {
+      width: 0%;
+      height: 8px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .step-indicator {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .step-active {
+      background: #3b82f6;
+      color: white;
+    }
+    .step-inactive {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+  </style>
 </head>
-<body class="p-4 md:p-6 bg-gray-100">
-  <div class="max-w-2xl mx-auto">
-    <header class="flex justify-between items-center mb-6 md:mb-8">
-      <div class="flex items-center">
-        <a href="index.html" class="text-blue-600 hover:text-blue-700 mr-4">
-          <i class="fas fa-arrow-left text-xl"></i>
-        </a>
-        <h1 class="text-2xl md:text-3xl font-bold text-blue-600">Subir App</h1>
-      </div>
-      
-      <button onclick="window.location.href='index.html'" 
-              class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
-        <i class="fas fa-home"></i>
-      </button>
-    </header>
+<body class="p-3 md:p-6">
 
-    <!-- Formulario -->
-    <div class="bg-white p-6 md:p-8 rounded-xl shadow-md">
-      <form id="appForm" class="space-y-4 md:space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de la App *</label>
-          <input type="text" id="nombre" required 
-                 class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 placeholder="Ej: Mi Aplicación Genial">
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Autor *</label>
-          <input type="text" id="autor" required 
-                 class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 placeholder="Tu nombre">
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
-          <textarea id="descripcion" required rows="4"
-                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe tu aplicación..."></textarea>
-        </div>
-        
+  <!-- Header -->
+  <header class="max-w-4xl mx-auto mb-6 md:mb-8">
+    <div class="flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition duration-300">
+        <i class="fas fa-arrow-left"></i>
+        <span class="hidden md:inline">Volver al Inicio</span>
+      </a>
+      <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text gradient-bg text-center flex-1">
+        Subir Aplicación
+      </h1>
+      <div class="w-8"></div> <!-- Espacio para balance -->
+    </div>
+
+    <!-- Indicador de pasos -->
+    <div class="flex justify-center items-center gap-4 mt-6 mb-2">
+      <div class="flex items-center">
+        <div class="step-indicator step-active">1</div>
+        <span class="ml-2 text-sm font-medium text-gray-700">Información</span>
+      </div>
+      <div class="w-8 h-0.5 bg-gray-300"></div>
+      <div class="flex items-center">
+        <div class="step-indicator step-inactive">2</div>
+        <span class="ml-2 text-sm font-medium text-gray-500">Archivos</span>
+      </div>
+      <div class="w-8 h-0.5 bg-gray-300"></div>
+      <div class="flex items-center">
+        <div class="step-indicator step-inactive">3</div>
+        <span class="ml-2 text-sm font-medium text-gray-500">Subir</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Formulario -->
+  <main class="max-w-2xl mx-auto">
+    <div class="form-card bg-white p-5 md:p-8 rounded-2xl">
+      <form id="appForm" class="space-y-5 md:space-y-6">
+        <!-- Información básica -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">URL del Icono *</label>
-            <input type="url" id="icono" required 
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   placeholder="https://ejemplo.com/icono.png"
-                   value="https://via.placeholder.com/512/3B82F6/FFFFFF?text=APP">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-heading mr-2 text-blue-500"></i>
+              Nombre de la App *
+            </label>
+            <input type="text" id="nombre" required 
+                   class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                   placeholder="Ej: Mi Aplicación Genial">
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">URL del APK *</label>
-            <input type="url" id="url_apk" required 
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   placeholder="https://ejemplo.com/app.apk">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-user mr-2 text-green-500"></i>
+              Autor *
+            </label>
+            <input type="text" id="autor" required 
+                   class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                   placeholder="Tu nombre">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-tag mr-2 text-purple-500"></i>
+              Categoría
+            </label>
+            <select class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+              <option>Utilidades</option>
+              <option>Juegos</option>
+              <option>Productividad</option>
+              <option>Educación</option>
+              <option>Entretenimiento</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-align-left mr-2 text-yellow-500"></i>
+            Descripción *
+          </label>
+          <textarea id="descripcion" required rows="4"
+                    class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 resize-none"
+                    placeholder="Describe tu aplicación, sus características principales y qué hace..."></textarea>
+        </div>
+
+        <!-- Subir Icono -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-image mr-2 text-pink-500"></i>
+            Icono de la App *
+          </label>
+          <div class="file-upload rounded-xl p-6 text-center cursor-pointer transition duration-300"
+               id="iconoUpload"
+               onclick="document.getElementById('iconoFile').click()">
+            <input type="file" id="iconoFile" accept="image/*" class="hidden">
+            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+            <p class="text-gray-600 font-medium" id="iconoText">Haz clic para subir un icono</p>
+            <p class="text-sm text-gray-400 mt-2">PNG, JPG, WEBP (Recomendado: 512x512px, Máx. 5MB)</p>
+          </div>
+          <div id="iconoPreview" class="mt-4 hidden text-center">
+            <img id="iconoPreviewImg" class="w-20 h-20 rounded-2xl mx-auto shadow-md object-cover">
+            <button type="button" onclick="removeIcono()" class="text-red-500 text-sm mt-3 font-medium hover:text-red-600 transition duration-300">
+              <i class="fas fa-times mr-1"></i>Quitar icono
+            </button>
+          </div>
+        </div>
+        
+        <!-- Subir APK -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-file-archive mr-2 text-green-500"></i>
+            Archivo APK *
+          </label>
+          <div class="file-upload rounded-xl p-6 text-center cursor-pointer transition duration-300"
+               id="apkUpload"
+               onclick="document.getElementById('apkFile').click()">
+            <input type="file" id="apkFile" accept=".apk" class="hidden">
+            <i class="fas fa-file-alt text-4xl text-gray-400 mb-3"></i>
+            <p class="text-gray-600 font-medium" id="apkText">Haz clic para subir el APK</p>
+            <p class="text-sm text-gray-400 mt-2">Solo archivos .apk (Máx. 100MB)</p>
+          </div>
+          <div id="apkInfo" class="mt-4 hidden">
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-xl border">
+              <div class="flex items-center">
+                <i class="fas fa-file-archive text-blue-500 text-xl mr-3"></i>
+                <div>
+                  <span id="apkFileName" class="font-semibold text-gray-800 block"></span>
+                  <span id="apkFileSize" class="text-sm text-gray-500"></span>
+                </div>
+              </div>
+              <button type="button" onclick="removeApk()" class="text-red-500 hover:text-red-600 transition duration-300 p-2">
+                <i class="fas fa-times text-lg"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div id="progressContainer" class="hidden">
+          <div class="mb-4">
+            <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+              <span id="progressStatus">Preparando subida...</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+              <div id="progressBar" class="progress-bar h-3 rounded-full"></div>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="loading mx-auto mb-2"></div>
+            <p class="text-sm text-gray-500" id="progressMessage">Subiendo archivos...</p>
           </div>
         </div>
 
         <!-- Información -->
-        <div class="bg-blue-50 p-4 rounded-lg">
-          <h3 class="font-semibold text-blue-800 mb-2">
+        <div class="bg-blue-50 border border-blue-200 p-5 rounded-xl">
+          <h3 class="font-semibold text-blue-800 mb-3 flex items-center">
             <i class="fas fa-info-circle mr-2"></i>Información importante
           </h3>
-          <ul class="text-sm text-blue-700 space-y-1">
-            <li>• Asegúrate de que las URLs sean accesibles públicamente</li>
-            <li>• El icono debe ser una imagen cuadrada</li>
-            <li>• El APK debe estar alojado en un servidor accesible</li>
+          <ul class="text-sm text-blue-700 space-y-2">
+            <li class="flex items-start">
+              <i class="fas fa-shield-alt mr-2 mt-0.5"></i>
+              <span>Asegúrate de que el APK sea seguro y esté libre de malware</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-image mr-2 mt-0.5"></i>
+              <span>El icono debe ser una imagen cuadrada para mejor visualización</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-clock mr-2 mt-0.5"></i>
+              <span>La subida puede tomar unos minutos dependiendo del tamaño y tu conexión</span>
+            </li>
           </ul>
         </div>
         
+        <!-- Botón de envío -->
         <button type="submit" id="submitBtn"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 md:p-4 rounded-lg font-semibold transition duration-300 flex items-center justify-center">
-          <i class="fas fa-upload mr-2"></i>Subir Aplicación
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-4 md:p-5 rounded-xl font-semibold transition duration-300 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+          <i class="fas fa-cloud-upload-alt"></i>
+          Subir Aplicación
         </button>
       </form>
       
-      <div id="mensaje" class="mt-4 md:mt-6 hidden p-4 rounded-lg"></div>
+      <div id="mensaje" class="mt-5 md:mt-6 hidden p-5 rounded-xl"></div>
     </div>
-  </div>
+  </main>
 
-  <footer class="text-center mt-8 md:mt-10 text-gray-500 py-4">
-    <p>© 2025 Copyright Ángel</p>
+  <!-- Footer -->
+  <footer class="text-center mt-8 md:mt-10 text-gray-500 py-6">
+    <p class="text-sm md:text-base">© 2025 Copyright Ángel - Mini PlayStore</p>
   </footer>
 
   <script type="module">
-    import { db, collection, addDoc, serverTimestamp } from './firebase.js';
+    import { db, collection, addDoc, serverTimestamp, storage, ref, uploadBytesResumable, getDownloadURL } from './firebase.js';
 
     const form = document.getElementById('appForm');
     const mensaje = document.getElementById('mensaje');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressMessage = document.getElementById('progressMessage');
+
+    let iconoFile = null;
+    let apkFile = null;
+
+    // Configurar drag & drop para icono
+    setupFileUpload('iconoUpload', 'iconoFile', handleIconoFile);
+    setupFileUpload('apkUpload', 'apkFile', handleApkFile);
+
+    function setupFileUpload(dropZoneId, fileInputId, handler) {
+      const dropZone = document.getElementById(dropZoneId);
+      const fileInput = document.getElementById(fileInputId);
+      
+      fileInput.addEventListener('change', (e) => {
+        handler(e.target.files[0]);
+      });
+
+      ['dragover', 'dragenter'].forEach(event => {
+        dropZone.addEventListener(event, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'dragend', 'drop'].forEach(event => {
+        dropZone.addEventListener(event, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+          if (event === 'drop') {
+            handler(e.dataTransfer.files[0]);
+          }
+        });
+      });
+    }
+
+    function handleIconoFile(file) {
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        mostrarMensaje('❌ Por favor, selecciona un archivo de imagen válido', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        mostrarMensaje('❌ El icono debe ser menor a 5MB', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      iconoFile = file;
+      document.getElementById('iconoText').textContent = file.name;
+      
+      // Mostrar preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('iconoPreviewImg').src = e.target.result;
+        document.getElementById('iconoPreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleApkFile(file) {
+      if (!file) return;
+      
+      if (!file.name.toLowerCase().endsWith('.apk')) {
+        mostrarMensaje('❌ Por favor, selecciona un archivo APK válido', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      if (file.size > 100 * 1024 * 1024) {
+        mostrarMensaje('❌ El APK debe ser menor a 100MB', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      apkFile = file;
+      document.getElementById('apkText').textContent = file.name;
+      document.getElementById('apkFileName').textContent = file.name;
+      document.getElementById('apkFileSize').textContent = formatFileSize(file.size);
+      document.getElementById('apkInfo').classList.remove('hidden');
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function removeIcono() {
+      iconoFile = null;
+      document.getElementById('iconoText').textContent = 'Haz clic para subir un icono';
+      document.getElementById('iconoPreview').classList.add('hidden');
+      document.getElementById('iconoFile').value = '';
+    }
+
+    function removeApk() {
+      apkFile = null;
+      document.getElementById('apkText').textContent = 'Haz clic para subir el APK';
+      document.getElementById('apkInfo').classList.add('hidden');
+      document.getElementById('apkFile').value = '';
+    }
+
+    // Función para subir archivo con progreso
+    function uploadFileWithProgress(file, path, onProgress) {
+      return new Promise((resolve, reject) => {
+        const storageRef = ref(storage, path);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            onProgress(Math.round(progress));
+          },
+          (error) => {
+            reject(error);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then(resolve);
+          }
+        );
+      });
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      if (!iconoFile || !apkFile) {
+        mostrarMensaje('❌ Por favor, sube tanto el icono como el archivo APK', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+
       // Mostrar loading
       const submitBtn = document.getElementById('submitBtn');
       const originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Subiendo...';
       submitBtn.disabled = true;
+      progressContainer.classList.remove('hidden');
 
-      const appData = {
-        nombre: document.getElementById('nombre').value,
-        autor: document.getElementById('autor').value,
-        descripcion: document.getElementById('descripcion').value,
-        icono: document.getElementById('icono').value,
-        url_apk: document.getElementById('url_apk').value,
-        fecha_subida: serverTimestamp()
-      };
+      let iconoURL = null;
+      let apkURL = null;
 
       try {
+        // Subir icono
+        progressStatus.textContent = 'Subiendo icono...';
+        progressMessage.textContent = 'Subiendo imagen del icono...';
+        
+        iconoURL = await uploadFileWithProgress(
+          iconoFile, 
+          `icons/${Date.now()}_${iconoFile.name}`,
+          (percent) => {
+            progressBar.style.width = percent / 2 + '%';
+            progressPercent.textContent = Math.round(percent / 2) + '%';
+          }
+        );
+
+        // Subir APK
+        progressStatus.textContent = 'Subiendo APK...';
+        progressMessage.textContent = 'Subiendo archivo de la aplicación...';
+        
+        apkURL = await uploadFileWithProgress(
+          apkFile, 
+          `apks/${Date.now()}_${apkFile.name}`,
+          (percent) => {
+            progressBar.style.width = 50 + (percent / 2) + '%';
+            progressPercent.textContent = Math.round(50 + (percent / 2)) + '%';
+          }
+        );
+
+        // Guardar en Firestore
+        progressStatus.textContent = 'Guardando información...';
+        progressMessage.textContent = 'Guardando datos de la aplicación...';
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+
+        const appData = {
+          nombre: document.getElementById('nombre').value,
+          autor: document.getElementById('autor').value,
+          descripcion: document.getElementById('descripcion').value,
+          icono: iconoURL,
+          url_apk: apkURL,
+          fecha_subida: serverTimestamp(),
+          nombre_archivo: apkFile.name,
+          tamaño_apk: apkFile.size,
+          version: '1.0'
+        };
+
         await addDoc(collection(db, "apps"), appData);
         
-        mostrarMensaje('¡App subida correctamente! ✅ Redirigiendo...', 'bg-green-100 text-green-700 border border-green-200');
-        form.reset();
+        mostrarMensaje('✅ ¡App subida correctamente! Redirigiendo al inicio...', 'bg-green-100 text-green-700 border border-green-200');
         
-        // Redirigir después de 2 segundos
+        // Redirigir después de 3 segundos
         setTimeout(() => {
           window.location.href = 'index.html';
-        }, 2000);
+        }, 3000);
         
       } catch (error) {
         console.error("Error subiendo app:", error);
-        mostrarMensaje('Error al subir la app: ' + error.message, 'bg-red-100 text-red-700 border border-red-200');
+        mostrarMensaje('❌ Error al subir la app: ' + error.message, 'bg-red-100 text-red-700 border border-red-200');
       } finally {
         // Restaurar botón
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+        progressContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+        progressPercent.textContent = '0%';
       }
     });
 
     function mostrarMensaje(texto, clases) {
       mensaje.innerHTML = `
         <div class="flex items-center">
-          <i class="fas fa-info-circle mr-3"></i>
-          <span>${texto}</span>
+          <i class="fas fa-info-circle mr-3 text-lg"></i>
+          <span class="font-medium">${texto}</span>
         </div>
       `;
-      mensaje.className = clases + ' p-4 rounded-lg mt-4';
+      mensaje.className = clases + ' p-5 rounded-xl mt-5';
       mensaje.classList.remove('hidden');
+      
+      // Auto-ocultar mensajes de error después de 5 segundos
+      if (clases.includes('bg-red-100')) {
+        setTimeout(() => {
+          mensaje.classList.add('hidden');
+        }, 5000);
+      }
     }
   </script>
 </body>
