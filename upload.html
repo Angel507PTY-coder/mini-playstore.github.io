@@ -14,6 +14,22 @@
     .form-card {
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
+    .file-upload {
+      border: 2px dashed #d1d5db;
+      transition: all 0.3s ease;
+    }
+    .file-upload:hover {
+      border-color: #3b82f6;
+      background-color: #f8fafc;
+    }
+    .file-upload.dragover {
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+    }
+    .progress-bar {
+      width: 0%;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body class="p-4 md:p-6">
@@ -40,6 +56,7 @@
   <main class="max-w-2xl mx-auto">
     <div class="form-card bg-white p-6 md:p-8 rounded-xl">
       <form id="appForm" class="space-y-4 md:space-y-6">
+        <!-- Nombre de la App -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de la App *</label>
           <input type="text" id="nombre" required 
@@ -47,6 +64,7 @@
                  placeholder="Ej: Mi Aplicación Genial">
         </div>
         
+        <!-- Autor -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Autor *</label>
           <input type="text" id="autor" required 
@@ -54,26 +72,65 @@
                  placeholder="Tu nombre o empresa">
         </div>
         
+        <!-- Descripción -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
           <textarea id="descripcion" required rows="4"
                     class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Describe tu aplicación..."></textarea>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">URL del Icono *</label>
-            <input type="url" id="icono" required 
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   placeholder="https://ejemplo.com/icono.png">
+
+        <!-- Subir Icono -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Icono de la App *</label>
+          <div class="file-upload rounded-lg p-6 text-center cursor-pointer"
+               id="iconoUpload"
+               onclick="document.getElementById('iconoFile').click()">
+            <input type="file" id="iconoFile" accept="image/*" class="hidden">
+            <i class="fas fa-image text-3xl text-gray-400 mb-2"></i>
+            <p class="text-gray-600" id="iconoText">Haz clic para subir un icono</p>
+            <p class="text-sm text-gray-400 mt-1">PNG, JPG (Máx. 2MB)</p>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">URL del APK *</label>
-            <input type="url" id="url_apk" required 
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   placeholder="https://ejemplo.com/app.apk">
+          <div id="iconoPreview" class="mt-3 hidden text-center">
+            <img id="iconoPreviewImg" class="w-16 h-16 rounded-lg mx-auto">
+            <button type="button" onclick="removeIcono()" class="text-red-500 text-sm mt-2">
+              <i class="fas fa-times mr-1"></i>Quitar icono
+            </button>
+          </div>
+        </div>
+        
+        <!-- Subir APK -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Archivo APK *</label>
+          <div class="file-upload rounded-lg p-6 text-center cursor-pointer"
+               id="apkUpload"
+               onclick="document.getElementById('apkFile').click()">
+            <input type="file" id="apkFile" accept=".apk" class="hidden">
+            <i class="fas fa-file-archive text-3xl text-gray-400 mb-2"></i>
+            <p class="text-gray-600" id="apkText">Haz clic para subir el APK</p>
+            <p class="text-sm text-gray-400 mt-1">Solo archivos .apk (Máx. 100MB)</p>
+          </div>
+          <div id="apkInfo" class="mt-3 hidden">
+            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+              <div>
+                <i class="fas fa-file-archive text-blue-500 mr-2"></i>
+                <span id="apkFileName" class="font-medium"></span>
+              </div>
+              <button type="button" onclick="removeApk()" class="text-red-500">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div id="progressContainer" class="hidden">
+          <div class="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Subiendo archivos...</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div id="progressBar" class="progress-bar bg-blue-500 h-2 rounded-full"></div>
           </div>
         </div>
 
@@ -85,11 +142,13 @@
           <ul class="text-sm text-blue-700 space-y-1">
             <li>• Asegúrate de que el APK sea seguro y esté libre de malware</li>
             <li>• El icono debe ser una imagen cuadrada (recomendado 512x512px)</li>
-            <li>• Las URLs deben ser accesibles públicamente</li>
+            <li>• Tamaño máximo del APK: 100MB</li>
+            <li>• Tamaño máximo del icono: 2MB</li>
           </ul>
         </div>
         
-        <button type="submit" 
+        <!-- Botón de envío -->
+        <button type="submit" id="submitBtn"
                 class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 md:p-4 rounded-lg font-semibold transition duration-300 flex items-center justify-center">
           <i class="fas fa-upload mr-2"></i>Subir Aplicación
         </button>
@@ -105,34 +164,180 @@
   </footer>
 
   <script type="module">
-    import { db, collection, addDoc, serverTimestamp } from './firebase.js';
+    import { db, collection, addDoc, serverTimestamp, storage, ref, uploadBytes, getDownloadURL } from './firebase.js';
 
     const form = document.getElementById('appForm');
     const mensaje = document.getElementById('mensaje');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+
+    let iconoFile = null;
+    let apkFile = null;
+
+    // Configurar drag & drop para icono
+    const iconoUpload = document.getElementById('iconoUpload');
+    const iconoFileInput = document.getElementById('iconoFile');
+    
+    iconoFileInput.addEventListener('change', (e) => {
+      handleIconoFile(e.target.files[0]);
+    });
+
+    iconoUpload.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      iconoUpload.classList.add('dragover');
+    });
+
+    iconoUpload.addEventListener('dragleave', () => {
+      iconoUpload.classList.remove('dragover');
+    });
+
+    iconoUpload.addEventListener('drop', (e) => {
+      e.preventDefault();
+      iconoUpload.classList.remove('dragover');
+      handleIconoFile(e.dataTransfer.files[0]);
+    });
+
+    // Configurar drag & drop para APK
+    const apkUpload = document.getElementById('apkUpload');
+    const apkFileInput = document.getElementById('apkFile');
+    
+    apkFileInput.addEventListener('change', (e) => {
+      handleApkFile(e.target.files[0]);
+    });
+
+    apkUpload.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      apkUpload.classList.add('dragover');
+    });
+
+    apkUpload.addEventListener('dragleave', () => {
+      apkUpload.classList.remove('dragover');
+    });
+
+    apkUpload.addEventListener('drop', (e) => {
+      e.preventDefault();
+      apkUpload.classList.remove('dragover');
+      handleApkFile(e.dataTransfer.files[0]);
+    });
+
+    function handleIconoFile(file) {
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        mostrarMensaje('Por favor, selecciona un archivo de imagen válido', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      if (file.size > 2 * 1024 * 1024) {
+        mostrarMensaje('El icono debe ser menor a 2MB', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      iconoFile = file;
+      document.getElementById('iconoText').textContent = file.name;
+      
+      // Mostrar preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('iconoPreviewImg').src = e.target.result;
+        document.getElementById('iconoPreview').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleApkFile(file) {
+      if (!file) return;
+      
+      if (!file.name.endsWith('.apk')) {
+        mostrarMensaje('Por favor, selecciona un archivo APK válido', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      if (file.size > 100 * 1024 * 1024) {
+        mostrarMensaje('El APK debe ser menor a 100MB', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+      
+      apkFile = file;
+      document.getElementById('apkText').textContent = file.name;
+      document.getElementById('apkFileName').textContent = file.name;
+      document.getElementById('apkInfo').classList.remove('hidden');
+    }
+
+    function removeIcono() {
+      iconoFile = null;
+      document.getElementById('iconoText').textContent = 'Haz clic para subir un icono';
+      document.getElementById('iconoPreview').classList.add('hidden');
+      iconoFileInput.value = '';
+    }
+
+    function removeApk() {
+      apkFile = null;
+      document.getElementById('apkText').textContent = 'Haz clic para subir el APK';
+      document.getElementById('apkInfo').classList.add('hidden');
+      apkFileInput.value = '';
+    }
+
+    // Subir archivo a Firebase Storage
+    async function uploadFile(file, path) {
+      const storageRef = ref(storage, path);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    }
+
+    // Actualizar progreso
+    function updateProgress(percent) {
+      progressBar.style.width = percent + '%';
+      progressPercent.textContent = Math.round(percent) + '%';
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      if (!iconoFile || !apkFile) {
+        mostrarMensaje('Por favor, sube tanto el icono como el archivo APK', 'bg-red-100 text-red-700 border border-red-200');
+        return;
+      }
+
       // Mostrar loading
-      const submitBtn = form.querySelector('button[type="submit"]');
+      const submitBtn = document.getElementById('submitBtn');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Subiendo...';
       submitBtn.disabled = true;
-
-      const appData = {
-        nombre: document.getElementById('nombre').value,
-        autor: document.getElementById('autor').value,
-        descripcion: document.getElementById('descripcion').value,
-        icono: document.getElementById('icono').value,
-        url_apk: document.getElementById('url_apk').value,
-        fecha_subida: serverTimestamp()
-      };
+      progressContainer.classList.remove('hidden');
 
       try {
+        updateProgress(10);
+
+        // Subir icono
+        const iconoURL = await uploadFile(iconoFile, `icons/${Date.now()}_${iconoFile.name}`);
+        updateProgress(50);
+
+        // Subir APK
+        const apkURL = await uploadFile(apkFile, `apks/${Date.now()}_${apkFile.name}`);
+        updateProgress(90);
+
+        // Guardar en Firestore
+        const appData = {
+          nombre: document.getElementById('nombre').value,
+          autor: document.getElementById('autor').value,
+          descripcion: document.getElementById('descripcion').value,
+          icono: iconoURL,
+          url_apk: apkURL,
+          fecha_subida: serverTimestamp(),
+          nombre_archivo: apkFile.name,
+          tamaño_apk: apkFile.size
+        };
+
         await addDoc(collection(db, "apps"), appData);
+        updateProgress(100);
         
         mostrarMensaje('¡App subida correctamente! ✅ Redirigiendo...', 'bg-green-100 text-green-700 border border-green-200');
         form.reset();
+        removeIcono();
+        removeApk();
         
         // Redirigir después de 2 segundos
         setTimeout(() => {
@@ -146,6 +351,8 @@
         // Restaurar botón
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+        progressContainer.classList.add('hidden');
+        updateProgress(0);
       }
     });
 
@@ -158,6 +365,13 @@
       `;
       mensaje.className = clases + ' p-4 rounded-lg mt-4';
       mensaje.classList.remove('hidden');
+      
+      // Auto-ocultar mensajes de error después de 5 segundos
+      if (clases.includes('bg-red-100')) {
+        setTimeout(() => {
+          mensaje.classList.add('hidden');
+        }, 5000);
+      }
     }
   </script>
 </body>
