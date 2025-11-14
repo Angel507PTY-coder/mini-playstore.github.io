@@ -40,23 +40,6 @@
     .gradient-bg {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-    .step-indicator {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-    }
-    .step-active {
-      background: #3b82f6;
-      color: white;
-    }
-    .step-inactive {
-      background: #e5e7eb;
-      color: #6b7280;
-    }
   </style>
 </head>
 <body class="p-3 md:p-6">
@@ -71,25 +54,7 @@
       <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text gradient-bg text-center flex-1">
         Subir Aplicación
       </h1>
-      <div class="w-8"></div> <!-- Espacio para balance -->
-    </div>
-
-    <!-- Indicador de pasos -->
-    <div class="flex justify-center items-center gap-4 mt-6 mb-2">
-      <div class="flex items-center">
-        <div class="step-indicator step-active">1</div>
-        <span class="ml-2 text-sm font-medium text-gray-700">Información</span>
-      </div>
-      <div class="w-8 h-0.5 bg-gray-300"></div>
-      <div class="flex items-center">
-        <div class="step-indicator step-inactive">2</div>
-        <span class="ml-2 text-sm font-medium text-gray-500">Archivos</span>
-      </div>
-      <div class="w-8 h-0.5 bg-gray-300"></div>
-      <div class="flex items-center">
-        <div class="step-indicator step-inactive">3</div>
-        <span class="ml-2 text-sm font-medium text-gray-500">Subir</span>
-      </div>
+      <div class="w-8"></div>
     </div>
   </header>
 
@@ -98,40 +63,24 @@
     <div class="form-card bg-white p-5 md:p-8 rounded-2xl">
       <form id="appForm" class="space-y-5 md:space-y-6">
         <!-- Información básica -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="fas fa-heading mr-2 text-blue-500"></i>
-              Nombre de la App *
-            </label>
-            <input type="text" id="nombre" required 
-                   class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-                   placeholder="Ej: Mi Aplicación Genial">
-          </div>
-          
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="fas fa-user mr-2 text-green-500"></i>
-              Autor *
-            </label>
-            <input type="text" id="autor" required 
-                   class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-                   placeholder="Tu nombre">
-          </div>
-          
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="fas fa-tag mr-2 text-purple-500"></i>
-              Categoría
-            </label>
-            <select class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
-              <option>Utilidades</option>
-              <option>Juegos</option>
-              <option>Productividad</option>
-              <option>Educación</option>
-              <option>Entretenimiento</option>
-            </select>
-          </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-heading mr-2 text-blue-500"></i>
+            Nombre de la App *
+          </label>
+          <input type="text" id="nombre" required 
+                 class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                 placeholder="Ej: Mi Aplicación Genial">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-user mr-2 text-green-500"></i>
+            Autor *
+          </label>
+          <input type="text" id="autor" required 
+                 class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                 placeholder="Tu nombre">
         </div>
 
         <div>
@@ -141,7 +90,7 @@
           </label>
           <textarea id="descripcion" required rows="4"
                     class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 resize-none"
-                    placeholder="Describe tu aplicación, sus características principales y qué hace..."></textarea>
+                    placeholder="Describe tu aplicación..."></textarea>
         </div>
 
         <!-- Subir Icono -->
@@ -156,7 +105,7 @@
             <input type="file" id="iconoFile" accept="image/*" class="hidden">
             <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
             <p class="text-gray-600 font-medium" id="iconoText">Haz clic para subir un icono</p>
-            <p class="text-sm text-gray-400 mt-2">PNG, JPG, WEBP (Recomendado: 512x512px, Máx. 5MB)</p>
+            <p class="text-sm text-gray-400 mt-2">PNG, JPG, WEBP (Máx. 5MB)</p>
           </div>
           <div id="iconoPreview" class="mt-4 hidden text-center">
             <img id="iconoPreviewImg" class="w-20 h-20 rounded-2xl mx-auto shadow-md object-cover">
@@ -210,6 +159,9 @@
           <div class="text-center">
             <div class="loading mx-auto mb-2"></div>
             <p class="text-sm text-gray-500" id="progressMessage">Subiendo archivos...</p>
+            <button type="button" id="cancelButton" onclick="cancelUpload()" class="mt-2 text-red-500 text-sm font-medium hover:text-red-600">
+              <i class="fas fa-times mr-1"></i>Cancelar subida
+            </button>
           </div>
         </div>
 
@@ -224,19 +176,15 @@
               <span>Asegúrate de que el APK sea seguro y esté libre de malware</span>
             </li>
             <li class="flex items-start">
-              <i class="fas fa-image mr-2 mt-0.5"></i>
-              <span>El icono debe ser una imagen cuadrada para mejor visualización</span>
-            </li>
-            <li class="flex items-start">
-              <i class="fas fa-clock mr-2 mt-0.5"></i>
-              <span>La subida puede tomar unos minutos dependiendo del tamaño y tu conexión</span>
+              <i class="fas fa-wifi mr-2 mt-0.5"></i>
+              <span>La subida puede tardar dependiendo de tu conexión a internet</span>
             </li>
           </ul>
         </div>
         
         <!-- Botón de envío -->
         <button type="submit" id="submitBtn"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-4 md:p-5 rounded-xl font-semibold transition duration-300 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-4 md:p-5 rounded-xl font-semibold transition duration-300 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl">
           <i class="fas fa-cloud-upload-alt"></i>
           Subir Aplicación
         </button>
@@ -246,7 +194,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="text-center mt-8 md:mt-10 text-gray-500 py-6">
     <p class="text-sm md:text-base">© 2025 Copyright Ángel - Mini PlayStore</p>
   </footer>
@@ -261,11 +208,13 @@
     const progressPercent = document.getElementById('progressPercent');
     const progressStatus = document.getElementById('progressStatus');
     const progressMessage = document.getElementById('progressMessage');
+    const cancelButton = document.getElementById('cancelButton');
 
     let iconoFile = null;
     let apkFile = null;
+    let currentUploadTask = null;
 
-    // Configurar drag & drop para icono
+    // Configurar drag & drop
     setupFileUpload('iconoUpload', 'iconoFile', handleIconoFile);
     setupFileUpload('apkUpload', 'apkFile', handleApkFile);
 
@@ -311,7 +260,6 @@
       iconoFile = file;
       document.getElementById('iconoText').textContent = file.name;
       
-      // Mostrar preview
       const reader = new FileReader();
       reader.onload = (e) => {
         document.getElementById('iconoPreviewImg').src = e.target.result;
@@ -362,25 +310,62 @@
       document.getElementById('apkFile').value = '';
     }
 
-    // Función para subir archivo con progreso
-    function uploadFileWithProgress(file, path, onProgress) {
+    // Función mejorada para subir archivos
+    function uploadFileWithProgress(file, path) {
       return new Promise((resolve, reject) => {
         const storageRef = ref(storage, path);
         const uploadTask = uploadBytesResumable(storageRef, file);
         
+        currentUploadTask = uploadTask;
+        
         uploadTask.on('state_changed',
           (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            onProgress(Math.round(progress));
+            console.log(`Progreso de ${path}: ${Math.round(progress)}%`);
+            updateProgress(Math.round(progress), `Subiendo ${file.name}...`);
           },
           (error) => {
+            console.error('Error en upload:', error);
             reject(error);
           },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then(resolve);
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              console.log('Archivo subido exitosamente:', downloadURL);
+              resolve(downloadURL);
+            } catch (error) {
+              reject(error);
+            }
           }
         );
       });
+    }
+
+    function updateProgress(percent, message = '') {
+      progressBar.style.width = percent + '%';
+      progressPercent.textContent = percent + '%';
+      if (message) {
+        progressStatus.textContent = message;
+      }
+    }
+
+    window.cancelUpload = function() {
+      if (currentUploadTask) {
+        currentUploadTask.cancel();
+        console.log('Subida cancelada por el usuario');
+      }
+      resetUploadState();
+      mostrarMensaje('❌ Subida cancelada', 'bg-yellow-100 text-yellow-700 border border-yellow-200');
+    };
+
+    function resetUploadState() {
+      progressContainer.classList.add('hidden');
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Subir Aplicación';
+      progressBar.style.width = '0%';
+      progressPercent.textContent = '0%';
+      currentUploadTask = null;
     }
 
     form.addEventListener('submit', async (e) => {
@@ -396,42 +381,26 @@
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
       progressContainer.classList.remove('hidden');
+      cancelButton.classList.remove('hidden');
 
       let iconoURL = null;
       let apkURL = null;
 
       try {
-        // Subir icono
-        progressStatus.textContent = 'Subiendo icono...';
-        progressMessage.textContent = 'Subiendo imagen del icono...';
+        console.log('Iniciando subida de archivos...');
         
-        iconoURL = await uploadFileWithProgress(
-          iconoFile, 
-          `icons/${Date.now()}_${iconoFile.name}`,
-          (percent) => {
-            progressBar.style.width = percent / 2 + '%';
-            progressPercent.textContent = Math.round(percent / 2) + '%';
-          }
-        );
-
-        // Subir APK
-        progressStatus.textContent = 'Subiendo APK...';
-        progressMessage.textContent = 'Subiendo archivo de la aplicación...';
+        // Subir icono (25% del progreso)
+        progressMessage.textContent = 'Subiendo icono...';
+        iconoURL = await uploadFileWithProgress(iconoFile, `icons/${Date.now()}_${iconoFile.name}`);
         
-        apkURL = await uploadFileWithProgress(
-          apkFile, 
-          `apks/${Date.now()}_${apkFile.name}`,
-          (percent) => {
-            progressBar.style.width = 50 + (percent / 2) + '%';
-            progressPercent.textContent = Math.round(50 + (percent / 2)) + '%';
-          }
-        );
+        // Subir APK (75% del progreso)
+        progressMessage.textContent = 'Subiendo APK...';
+        apkURL = await uploadFileWithProgress(apkFile, `apks/${Date.now()}_${apkFile.name}`);
 
-        // Guardar en Firestore
+        // Guardar en Firestore (100%)
         progressStatus.textContent = 'Guardando información...';
-        progressMessage.textContent = 'Guardando datos de la aplicación...';
-        progressBar.style.width = '100%';
-        progressPercent.textContent = '100%';
+        progressMessage.textContent = 'Finalizando...';
+        updateProgress(100);
 
         const appData = {
           nombre: document.getElementById('nombre').value,
@@ -449,21 +418,27 @@
         
         mostrarMensaje('✅ ¡App subida correctamente! Redirigiendo al inicio...', 'bg-green-100 text-green-700 border border-green-200');
         
-        // Redirigir después de 3 segundos
         setTimeout(() => {
           window.location.href = 'index.html';
-        }, 3000);
+        }, 2000);
         
       } catch (error) {
-        console.error("Error subiendo app:", error);
-        mostrarMensaje('❌ Error al subir la app: ' + error.message, 'bg-red-100 text-red-700 border border-red-200');
+        console.error("Error completo:", error);
+        let errorMessage = 'Error al subir la app: ';
+        
+        if (error.code === 'storage/unauthorized') {
+          errorMessage += 'No tienes permisos para subir archivos. Verifica las reglas de Storage.';
+        } else if (error.code === 'storage/canceled') {
+          errorMessage = 'Subida cancelada';
+        } else if (error.code === 'storage/unknown') {
+          errorMessage += 'Error desconocido. Verifica tu conexión a internet.';
+        } else {
+          errorMessage += error.message;
+        }
+        
+        mostrarMensaje('❌ ' + errorMessage, 'bg-red-100 text-red-700 border border-red-200');
       } finally {
-        // Restaurar botón
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        progressContainer.classList.add('hidden');
-        progressBar.style.width = '0%';
-        progressPercent.textContent = '0%';
+        resetUploadState();
       }
     });
 
@@ -476,13 +451,6 @@
       `;
       mensaje.className = clases + ' p-5 rounded-xl mt-5';
       mensaje.classList.remove('hidden');
-      
-      // Auto-ocultar mensajes de error después de 5 segundos
-      if (clases.includes('bg-red-100')) {
-        setTimeout(() => {
-          mensaje.classList.add('hidden');
-        }, 5000);
-      }
     }
   </script>
 </body>
