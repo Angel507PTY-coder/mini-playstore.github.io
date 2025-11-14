@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -21,7 +21,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-console.log("✅ Firebase inicializado correctamente");
+console.log("✅ Firebase inicializado");
 
 // Autenticación anónima
 signInAnonymously(auth)
@@ -31,5 +31,5 @@ signInAnonymously(auth)
 // Exportar servicios
 export { 
   db, collection, getDocs, addDoc, serverTimestamp,
-  storage, ref, uploadBytes, getDownloadURL 
+  storage, ref, uploadBytesResumable, getDownloadURL 
 };
